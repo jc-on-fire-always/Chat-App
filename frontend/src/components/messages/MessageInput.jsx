@@ -1,19 +1,36 @@
+import { useState } from "react";
 import { BsSend } from "react-icons/bs";
+import useSendMessage from "../../hooks/useSendMessage";
 
 const MessageInput = () => {
+  const [message, setMessage] = useState("");
+  const { loading, sendMessage } = useSendMessage();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!message) return;
+    await sendMessage(message);
+    setMessage("");
+  };
   return (
-    <form className="px-4 my-3">
-      <div className="w-full">
+    <form className="px-4 my-3" onSubmit={handleSubmit}>
+      <div className="flex items-center w-full bg-gray-700 border border-gray-600 rounded-3xl overflow-hidden">
         <input
           type="text"
-          className="border text-sm rounded-lg block w-full p-2.5  bg-gray-700 border-gray-600 text-white"
+          className="flex-grow p-2 text-sm bg-gray-700 text-white focus:outline-none rounded"
           placeholder="Send a message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
         />
         <button
           type="submit"
-          className="absolute inset-y-0 end-0 flex items-center pe-3"
+          className="p-2 bg-gray-500 text-white flex items-center justify-center rounded-full h-10 w-10"
         >
-          <BsSend />
+          {loading ? (
+            <div className="loading loading-spinner"></div>
+          ) : (
+            <BsSend />
+          )}
         </button>
       </div>
     </form>
