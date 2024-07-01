@@ -2,6 +2,7 @@ import express from "express";
 import protectRoute from "../middlewares/protectRoute.js";
 import Conversation from "../models/conv-model.js";
 import Message from "../models/message-model.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 const router = express.Router();
 
@@ -29,6 +30,12 @@ router.post("/send/:id", protectRoute, async (req, res) => {
     }
 
     await Promise.all([conv.save(), newMessage.save()]);
+
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      // io.to(<socket_id>).emit() used to send events to specific client
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {
